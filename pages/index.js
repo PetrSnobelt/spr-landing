@@ -1,29 +1,31 @@
 import Layout from "../layouts/index";
 import getNotionData from "../data/notion";
-import { useState, useEffect } from "react";
 import Color from "color";
 import Head from "next/head";
+import Link from "next/link"
+// import { useEffect } from "react";
+// import useFocus from "../hooks/useFocus";
 
-export default function Page({ sections, etag, meta }) {
+export default function Page({ sections = [], etag = "", meta = {} }) {
   console.log(meta);
 
-  const focused = useFocus();
-  useEffect(
-    () => {
-      if (focused) {
-        fetch(window.location, {
-          headers: {
-            pragma: "no-cache"
-          }
-        }).then(res => {
-          if (res.ok && res.headers.get("x-version") !== etag) {
-            window.location.reload();
-          }
-        });
-      }
-    },
-    [focused]
-  );
+  // const focused = useFocus();
+  // useEffect(
+  //   () => {
+  //     if (focused) {
+  //       fetch(window.location, {
+  //         headers: {
+  //           pragma: "no-cache"
+  //         }
+  //       }).then(res => {
+  //         if (res.ok && res.headers.get("x-version") !== etag) {
+  //           window.location.reload();
+  //         }
+  //       });
+  //     }
+  //   },
+  //   [focused]
+  // );
 
   const color = Color(meta.color ? meta.color[0][0] : "#49fcd4");
   const color2 = color.darken(0.4);
@@ -112,6 +114,24 @@ export default function Page({ sections, etag, meta }) {
                 Learn More
               </a>
             </li>
+            <li>
+              <a
+                href="zeit-sample"
+                className="xbutton"
+              >
+                ZEIT-sample using SSRurl
+              </a>
+            </li>
+            <li>
+              <Link
+                href="?id=1a86e7f6-d6a5-4537-a2e5-15650c1888b8"
+                prefetch
+              >
+                <a className="xbutton">
+                  ZEIT-sample using query
+                </a>
+              </Link>
+            </li>
           </ul>
         </div>
       </section>
@@ -168,19 +188,22 @@ export default function Page({ sections, etag, meta }) {
   );
 }
 
-Page.getInitialProps = async ({ res }) => {
-  const notionData = await getNotionData();
-  const etag = require("crypto")
-    .createHash("md5")
-    .update(JSON.stringify(notionData))
-    .digest("hex");
+Page.getInitialProps = async ({ res, query }) => {
+  const notionData = await getNotionData(query.id);
+  console.log("query", query, notionData)
 
   if (res) {
+    const etag = require("crypto")
+      .createHash("md5")
+      .update(JSON.stringify(notionData))
+      .digest("hex");
+
     res.setHeader("Cache-Control", "s-maxage=1, stale-while-revalidate");
     res.setHeader("X-version", etag);
+    return { ...notionData, etag };
+  } else {
+    return { ...notionData };
   }
-
-  return { ...notionData, etag };
 };
 
 function renderText(title) {
@@ -203,21 +226,3 @@ function NotionImage({ src }) {
   }
 }
 
-const useFocus = () => {
-  const [state, setState] = useState(null);
-  const onFocusEvent = event => {
-    setState(true);
-  };
-  const onBlurEvent = event => {
-    setState(false);
-  };
-  useEffect(() => {
-    window.addEventListener("focus", onFocusEvent);
-    window.addEventListener("blur", onBlurEvent);
-    return () => {
-      window.removeEventListener("focus", onFocusEvent);
-      window.removeEventListener("blur", onBlurEvent);
-    };
-  });
-  return state;
-};
