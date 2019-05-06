@@ -1,9 +1,9 @@
 import fetch from "isomorphic-unfetch";
 
-const PAGE_ID = "1a86e7f6-d6a5-4537-a2e5-15650c1888b8";
+const ZEIT_PAGE_ID = "1a86e7f6-d6a5-4537-a2e5-15650c1888b8";
 
-export default async function getNotionData() {
-  const data = await loadPageChunk({ pageId: PAGE_ID });
+export default async function getNotionData(pageId = ZEIT_PAGE_ID) {
+  const data = await loadPageChunk({ pageId });
   const blocks = values(data.recordMap.block);
 
   const sections = [];
@@ -35,10 +35,12 @@ export default async function getNotionData() {
       section.children.push(child);
     } else if (value.type === "text") {
       list = null;
-      section.children.push({
-        type: "text",
-        value: value.properties.title
-      });
+      if (value.properties && value.properties.title){
+        section.children.push({
+          type: "text",
+          value: value.properties.title
+        });
+      }
     } else if (value.type === "bulleted_list") {
       if (list == null) {
         list = {
