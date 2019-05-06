@@ -114,21 +114,23 @@ export default function Page({ sections = [], etag = "", meta = {} }) {
                 Learn More
               </a>
             </li>
+          </ul>
+          <ul>
             <li>
               <a
-                href="zeit-sample"
+                href="?id=06816332-ba02-4d5f-bce5-12b4e86bc13a"
                 className="xbutton"
               >
-                ZEIT-sample using SSRurl
+                sample page using SSRurl
               </a>
             </li>
             <li>
               <Link
-                href="?id=1a86e7f6-d6a5-4537-a2e5-15650c1888b8"
+                href="?id=06816332-ba02-4d5f-bce5-12b4e86bc13a"
                 prefetch
               >
                 <a className="xbutton">
-                  ZEIT-sample using query
+                  sample page using Link
                 </a>
               </Link>
             </li>
